@@ -2,6 +2,7 @@ import asyncio
 import hashlib
 from io import BytesIO
 import imghdr
+import os
 from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
@@ -17,6 +18,7 @@ app = FastAPI(title="ML Image Queue API")
 
 MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024
 ALLOWED_IMAGE_TYPES = {"jpeg", "png", "gif", "bmp", "webp", "tiff"}
+MODEL_PATH = os.getenv("MODEL_PATH", "nammushroom_efficientnet_b0.pth")
 
 job_queue: asyncio.Queue[str] = asyncio.Queue()
 jobs: dict[str, dict[str, Any]] = {}
@@ -95,7 +97,9 @@ async def _run_model_inference(image_bytes: bytes, image_type: str) -> dict[str,
 
     class_names = ['nam_huong', 'nam_kim_cham'] 
     num_classes = len(class_names)
-    model_path = 'nammushroom_efficientnet_b0.pth'
+    model_path = MODEL_PATH
+    if not os.path.isfile(model_path):
+        raise FileNotFoundError(f"Khong tim thay model .pth tai duong dan: {model_path}")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = models.efficientnet_b0(weights=None)

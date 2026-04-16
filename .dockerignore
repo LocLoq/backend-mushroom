@@ -1,0 +1,13 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.pth
+test_image.jpg
+client_test.py
+setup_venv.ps1
+setup_venv.sh
+.vscode
