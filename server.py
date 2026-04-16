@@ -19,6 +19,7 @@ app = FastAPI(title="ML Image Queue API")
 MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024
 ALLOWED_IMAGE_TYPES = {"jpeg", "png", "gif", "bmp", "webp", "tiff"}
 MODEL_PATH = os.getenv("MODEL_PATH", "nammushroom_efficientnet_b0.pth")
+LABELS_PATH = os.getenv("LABELS_PATH", "labels.txt")
 
 job_queue: asyncio.Queue[str] = asyncio.Queue()
 jobs: dict[str, dict[str, Any]] = {}
@@ -92,25 +93,98 @@ async def _broadcast_event(event: str, data: dict[str, Any]) -> None:
     await ws_manager.broadcast({"event": event, "timestamp": _now_iso(), "data": data})
 
 
-async def _run_model_inference(image_bytes: bytes, image_type: str) -> dict[str, Any]:
-    start_time = time.perf_counter()
+def _load_class_names_from_file(labels_path: str) -> list[str]:
+    if not os.path.isfile(labels_path):
+        raise FileNotFoundError(f"Khong tim thay file label tai duong dan: {labels_path}")
 
-    class_names = ['nam_huong', 'nam_kim_cham'] 
-    num_classes = len(class_names)
-    model_path = MODEL_PATH
-    if not os.path.isfile(model_path):
-        raise FileNotFoundError(f"Khong tim thay model .pth tai duong dan: {model_path}")
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    class_names: list[str] = []
+    with open(labels_path, "r", encoding="utf-8") as file:
+        for raw_line in file:
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+
+            # Ho tro dinh dang co index: "0,label", "0:label", "0\tlabel"
+            parsed = line
+            for separator in (",", ":", "\t"):
+                if separator in line:
+                    left, right = line.split(separator, 1)
+                    if left.strip().isdigit() and right.strip():
+                        parsed = right.strip()
+                    break
+
+            class_names.append(parsed)
+
+    if not class_names:
+        raise ValueError(
+            f"File label rong hoac khong hop le: {labels_path}. Moi dong nen la ten lop, hoac dang 'index,label'."
+        )
+
+    return class_names
+
+
+def _extract_state_dict_from_checkpoint(checkpoint: Any) -> dict[str, Any]:
+    if isinstance(checkpoint, dict):
+        for key in ("model_state_dict", "state_dict"):
+            state_dict = checkpoint.get(key)
+            if isinstance(state_dict, dict):
+                return state_dict
+
+        if checkpoint and all(isinstance(key, str) for key in checkpoint.keys()) and all(
+            isinstance(value, torch.Tensor) for value in checkpoint.values()
+        ):
+            return checkpoint
+
+    raise ValueError(
+        "Khong doc duoc state_dict tu file .pth. Hay luu model theo state_dict hoac checkpoint co key state_dict/model_state_dict."
+    )
+
+
+def _infer_num_classes_from_state_dict(state_dict: dict[str, Any]) -> int | None:
+    weight_key = "classifier.1.weight"
+    weight = state_dict.get(weight_key)
+    if isinstance(weight, torch.Tensor) and weight.ndim == 2:
+        return int(weight.shape[0])
+
+    bias_key = "classifier.1.bias"
+    bias = state_dict.get(bias_key)
+    if isinstance(bias, torch.Tensor) and bias.ndim == 1:
+        return int(bias.shape[0])
+
+    return None
+
+
+def _load_model_and_labels(model_path: str, device: torch.device) -> tuple[nn.Module, list[str]]:
+    checkpoint = torch.load(model_path, map_location=device, weights_only=True)
+    class_names = _load_class_names_from_file(LABELS_PATH)
+    state_dict = _extract_state_dict_from_checkpoint(checkpoint)
+
+    expected_num_classes = _infer_num_classes_from_state_dict(state_dict)
+    if expected_num_classes is not None and len(class_names) != expected_num_classes:
+        raise ValueError(
+            f"So label trong file ({len(class_names)}) khong khop so lop cua model ({expected_num_classes})."
+            f" Hay cap nhat file label: {LABELS_PATH}"
+        )
 
     model = models.efficientnet_b0(weights=None)
-
     num_ftrs = model.classifier[1].in_features
-    model.classifier[1] = nn.Linear(num_ftrs, num_classes)
-
-    model.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
+    model.classifier[1] = nn.Linear(num_ftrs, len(class_names))
+    model.load_state_dict(state_dict)
 
     model = model.to(device)
     model.eval()
+    return model, class_names
+
+
+async def _run_model_inference(image_bytes: bytes, image_type: str) -> dict[str, Any]:
+    start_time = time.perf_counter()
+
+    model_path = MODEL_PATH
+    if not os.path.isfile(model_path):
+        raise FileNotFoundError(f"Khong tim thay model .pth tai duong dan: {model_path}")
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model, class_names = _load_model_and_labels(model_path=model_path, device=device)
 
     transform = transforms.Compose([
         transforms.Resize(256),

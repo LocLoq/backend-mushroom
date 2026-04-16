@@ -1,0 +1,12 @@
+Agaricus
+Amanita
+Boletus
+Cortinarius
+Entoloma
+Exidia
+Hygrocybe
+Inocybe
+Lactarius
+Pluteus
+Russula
+Suillus
