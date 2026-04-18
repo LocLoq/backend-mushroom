@@ -102,9 +102,9 @@ async def _ping_loop(websocket: WebSocketClientProtocol, stop_event: asyncio.Eve
         await websocket.send("ping")
 
 
-async def run_test(host: str, port: int, image_path: Path, timeout_seconds: int) -> None:
-    base_url = f"http://{host}:{port}"
-    ws_url = f"ws://{host}:{port}/ws/queue"
+async def run_test(server_ip: str, server_port: int, image_path: Path, timeout_seconds: int) -> None:
+    base_url = f"http://{server_ip}:{server_port}"
+    ws_url = f"ws://{server_ip}:{server_port}/ws/queue"
 
     stop_event = asyncio.Event()
     state: dict[str, Any] = {"target_job_id": None}
@@ -138,8 +138,21 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Client test upload image + websocket queue/result cho ML Image Queue API"
     )
-    parser.add_argument("--host", default="127.0.0.1", help="Host của FastAPI server")
-    parser.add_argument("--port", type=int, default=8000, help="Port của FastAPI server")
+    parser.add_argument(
+        "--server-ip",
+        "--host",
+        dest="server_ip",
+        default="127.0.0.1",
+        help="IP hoặc hostname của backend server",
+    )
+    parser.add_argument(
+        "--server-port",
+        "--port",
+        dest="server_port",
+        type=int,
+        default=8000,
+        help="Port của backend server",
+    )
     parser.add_argument("--image", required=True, help="Đường dẫn ảnh cần upload")
     parser.add_argument(
         "--timeout",
@@ -159,8 +172,8 @@ def main() -> None:
 
     asyncio.run(
         run_test(
-            host=args.host,
-            port=args.port,
+            server_ip=args.server_ip,
+            server_port=args.server_port,
             image_path=image_path,
             timeout_seconds=args.timeout,
         )

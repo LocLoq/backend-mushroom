@@ -12,6 +12,6 @@ RUN python -m pip install --upgrade pip setuptools wheel \
 
 COPY server.py labels.txt /app/
 
-EXPOSE 8000
+EXPOSE 8367
 
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8367"]

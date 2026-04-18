@@ -14,14 +14,14 @@ services:
     container_name: mushroom-backend-cpu
     profiles: ["cpu"]
     ports:
-      - "8000:8367"
+      - "8367:8367"
 
   backend-gpu:
     <<: *backend-common
     container_name: mushroom-backend-gpu
     profiles: ["gpu"]
     ports:
-      - "8000:8367"
+      - "8367:8367"
     deploy:
       resources:
         reservations:
