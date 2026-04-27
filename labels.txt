@@ -10,3 +10,8 @@ Lactarius
 Pluteus
 Russula
 Suillus
+hericium_erinaceus
+hypsizygus_tessellatus
+lentinula_edodes
+pleurotus_citrinopileatus
+pleurotus_djamor

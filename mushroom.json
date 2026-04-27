@@ -1,0 +1,87 @@
+[
+  {
+    "ten_nam": "Nấm mỡ",
+    "ten_khoa_hoc": "Agaricus",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm tán độc",
+    "ten_khoa_hoc": "Amanita",
+    "co_doc": true
+  },
+  {
+    "ten_nam": "Nấm ống",
+    "ten_khoa_hoc": "Boletus",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm màn nhện",
+    "ten_khoa_hoc": "Cortinarius",
+    "co_doc": true
+  },
+  {
+    "ten_nam": "Nấm phiến hồng",
+    "ten_khoa_hoc": "Entoloma",
+    "co_doc": true
+  },
+  {
+    "ten_nam": "Nấm thạch đen",
+    "ten_khoa_hoc": "Exidia",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm sáp",
+    "ten_khoa_hoc": "Hygrocybe",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm xơ",
+    "ten_khoa_hoc": "Inocybe",
+    "co_doc": true
+  },
+  {
+    "ten_nam": "Nấm sữa",
+    "ten_khoa_hoc": "Lactarius",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm khiên",
+    "ten_khoa_hoc": "Pluteus",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm giòn",
+    "ten_khoa_hoc": "Russula",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm bơ",
+    "ten_khoa_hoc": "Suillus",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm Hầu Thủ",
+    "ten_khoa_hoc": "hericium_erinaceus",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm Notaky",
+    "ten_khoa_hoc": "hypsizygus_tessellatus",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm Hương",
+    "ten_khoa_hoc": "lentinula_edodes",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm Hoàng Kim",
+    "ten_khoa_hoc": "pleurotus_citrinopileatus",
+    "co_doc": false
+  },
+  {
+    "ten_nam": "Nấm Hồng Ngọc",
+    "ten_khoa_hoc": "pleurotus_djamor",
+    "co_doc": false
+  }
+]
